@@ -8,8 +8,8 @@ const RenderCards = ({data, title}) => {
 
 return (
   <h2 className = "mt-5 font-bold text-[#6449ff] text-xl uppercase">{title}</h2>
-)
-}
+);
+};
 
 
 
@@ -18,7 +18,7 @@ const Home = () => {
   const[allPosts, setAllPosts] = useState(null);
   const[searchText, setSearchText] = useState("");
 
-  useEffect(() => {
+
     const fetchPosts = async () => {
       setLoading(true);
       try{
@@ -27,21 +27,34 @@ const Home = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-        })
+        });
         if (response.ok){
           const result = await response.json();
-
           setAppPosts(result.data.reverse());        }
       } catch(error){
         alert(error)
       } finally{
-        setLoading(false)
+        setLoading(false);
       }
 
-    }
-    fetchPosts();
+    };
 
+    useEffect(() => {
+      fetchPosts();
   }, []);
+
+  const handleSearchChange = (e) => {
+    clearTimeout(searchTimeout);
+    setSearchText(e.target.value);
+
+    setSearchTimeout(
+      setTimeout(() => {
+        const searchResult = allPosts.filter((item) => item.name.toLowerCase().includes(searchText.toLowerCase()) || item.prompt.toLowerCase().includes(searchText.toLowerCase()));
+        setSearchedResults(searchResult);
+      }, 500),
+    );
+  };
+
   return (
     <section className = "max-w-7xl mx-auto">
       <div>
@@ -51,7 +64,14 @@ const Home = () => {
       </div>
 
       <div className = "mt-16">
-        <FormField />
+        <FormField
+        LabelName="Search posts"
+        type="text"
+        name="text"
+        placeholder="Search something..."
+        value={searchText}
+        handleChange={handleSearchChange}
+         />
 
 
       </div>
@@ -71,7 +91,7 @@ const Home = () => {
           <div className = 'grid lg:grid-cols-4 sm:gr-cols-3 xs:grid-cols-2 grid-cols-1 gap-3'>
             {searchText ? (
               <RenderCards
-              data= {[]}
+              data= {searchedResults}
               title= "No search results found"
               />
             ) : (
@@ -85,7 +105,7 @@ const Home = () => {
         )}
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
